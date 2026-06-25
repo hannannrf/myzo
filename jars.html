@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Little Notes for Zoa 🫙</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=Caveat:wght@500;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #fff8f9;
+      --accent: #d4638a;
+      --accent2: #a78bbb;
+      --muted: #9a7f8a;
+      --text: #2a1f25;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "DM Sans", system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(212,99,138,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 35% at 95% 95%, rgba(167,139,187,0.1) 0%, transparent 50%);
+    }
+    .back { padding: 1.2rem 1.5rem 0; }
+    .back a { color: var(--accent); font-weight: 600; text-decoration: none; font-size: 0.95rem; }
+    .back a:hover { text-decoration: underline; }
+    header { text-align: center; padding: 1.5rem 1rem 0.5rem; }
+    header h1 { font-family: Fraunces, Georgia, serif; font-size: clamp(1.8rem,5vw,2.6rem); font-weight: 500; color: var(--text); margin-bottom: 0.35rem; }
+    header h1 em { font-style: italic; color: var(--accent); }
+    header p { color: var(--muted); font-size: 0.93rem; }
+
+    .jars-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      padding: 2.5rem 1.5rem 4rem;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    /* ===== JAR ===== */
+    .jar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.1rem;
+      flex: 1;
+      min-width: 240px;
+      max-width: 290px;
+    }
+
+    .jar-label {
+      font-family: Fraunces, Georgia, serif;
+      font-size: 1.05rem;
+      color: var(--text);
+      text-align: center;
+      font-style: italic;
+    }
+
+    .jar-svg-wrap { cursor: pointer; position: relative; }
+    .jar-svg-wrap:hover .jar-body { filter: brightness(1.04); }
+
+    /* Rolled notes sticking out of jar */
+    .note-stub {
+      position: absolute;
+      width: 18px;
+      height: 30px;
+      border-radius: 3px 3px 2px 2px;
+      transform-origin: bottom center;
+      bottom: 62px;
+    }
+
+    .notes-grid {
+      display: grid;
+      gap: 0.6rem;
+      width: 100%;
+    }
+
+    .note-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      box-shadow: 0 4px 18px rgba(42,31,37,0.07);
+      border-left: 3px solid var(--jar-color, #d4638a);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .note-card:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(42,31,37,0.11); }
+    .note-card.sealed .note-text { display: none; }
+    .note-card.sealed .note-preview { display: flex; }
+    .note-card.open .note-text { display: block; }
+    .note-card.open .note-preview { display: none; }
+
+    .note-preview {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    .note-preview .scroll-icon { font-size: 1.1rem; }
+    .note-text {
+      font-family: Caveat, cursive;
+      font-size: 1.15rem;
+      color: #3a2030;
+      line-height: 1.5;
+    }
+
+    /* ripple on open */
+    .note-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(212,99,138,0.08);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: 12px;
+      pointer-events: none;
+    }
+    .note-card.just-opened::after { opacity: 1; }
+
+    .jar-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      animation: pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:0.9} }
+
+    /* floating petals */
+    .fp { position: fixed; top: -30px; pointer-events: none; animation: falldown linear infinite; opacity: 0.45; font-size: 1rem; }
+    @keyframes falldown { to { transform: translateY(110vh) rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <p class="back"><a href="index.html">← back home</a></p>
+  <header>
+    <h1>Little notes for <em>Zoa</em></h1>
+    <p>tap any note to unfold it 🌸</p>
+  </header>
+
+  <div class="jars-row" id="jars-row"></div>
+
+  <script>
+  var JARS = [
+    {
+      id: 'sad',
+      label: 'Open when you\'re sad',
+      color: '#d4638a',
+      glassColor: 'rgba(255,182,203,0.35)',
+      lidColor: '#e8a0bf',
+      emoji: '🌷',
+      notes: [
+        "You're allowed to cry, Zoa. Feelings aren't weakness — they're proof you're real and you feel deeply. Let it out. 💗",
+        "Even on your worst days, you are still the most wonderful person I know. That never changes.",
+        "I wish I could be there to hold you right now. But I need you to know — you are never, ever alone. I'm always with you.",
+        "This sadness is temporary. You've survived 100% of your hard days so far. You'll survive this one too. I believe in you.",
+        "Text me right now. Even if it's just 'hey'. I want to hear from you. You matter so much to me. 🌹",
+        "You are so loved, Zoa. By your mom. By your friends. And most of all, by me. Don't forget that on the days it's hardest to feel it."
+      ]
+    },
+    {
+      id: 'anxious',
+      label: 'Open when you\'re anxious',
+      color: '#a78bbb',
+      glassColor: 'rgba(196,175,230,0.35)',
+      lidColor: '#c4afd6',
+      emoji: '🫧',
+      notes: [
+        "Hey. Take a slow breath. In for 4, hold for 4, out for 4. You're safe. Whatever's spinning in your head — it's not bigger than you.",
+        "Anxiety lies to you. It makes things feel permanent that are actually temporary. This feeling will pass. It always does.",
+        "You don't have to figure everything out right now. Right now you just have to breathe. That's enough.",
+        "You are not your worst thought. You are the girl who is kind, strong, and so incredibly loved. Hold onto that. 💜",
+        "I've watched you handle so much. You are stronger than you give yourself credit for. Always. I see it even when you don't.",
+        "If your heart is racing, try this: name 5 things you can see. 4 you can touch. 3 you can hear. You're here. You're okay. 🌸"
+      ]
+    },
+    {
+      id: 'miss',
+      label: 'Open when you miss me',
+      color: '#e07850',
+      glassColor: 'rgba(255,210,180,0.35)',
+      lidColor: '#f4b89a',
+      emoji: '🌙',
+      notes: [
+        "I miss you too — more than you know. Every single day. But missing each other means we have something so real worth missing. 🌹",
+        "Close your eyes for a second. Imagine I'm right there next to you, just quiet, warm, and yours. Because in every way that matters, I am.",
+        "The distance is temporary. Us? We're forever. Every plan we've made, every late night call — none of that disappears with miles.",
+        "Whenever you miss me, re-read the 100 things. Because every single one of them is me thinking about you, always.",
+        "I'm literally one text away, Zoa. Always. Say the word and I'm there. Distance can't change that. 💗",
+        "Missing someone means they live in your heart even when they're not in the room. I live in yours. And you live in mine. Always. 🌙"
+      ]
+    }
+  ];
+
+  function buildJar(jar) {
+    var wrap = document.createElement('div');
+    wrap.className = 'jar-wrap';
+
+    // Label
+    var lbl = document.createElement('p');
+    lbl.className = 'jar-label';
+    lbl.textContent = jar.label;
+    wrap.appendChild(lbl);
+
+    // SVG jar
+    var svgWrap = document.createElement('div');
+    svgWrap.className = 'jar-svg-wrap';
+    svgWrap.innerHTML = buildJarSVG(jar);
+    wrap.appendChild(svgWrap);
+
+    // Hint
+    var hint = document.createElement('p');
+    hint.className = 'jar-hint';
+    hint.textContent = 'tap a note to open it ↓';
+    wrap.appendChild(hint);
+
+    // Notes
+    var grid = document.createElement('div');
+    grid.className = 'notes-grid';
+    grid.style.setProperty('--jar-color', jar.color);
+
+    jar.notes.forEach(function(text, i) {
+      var card = document.createElement('div');
+      card.className = 'note-card sealed';
+      card.style.borderLeftColor = jar.color;
+
+      var preview = document.createElement('div');
+      preview.className = 'note-preview';
+      preview.innerHTML = '<span class="scroll-icon">📜</span><span>Note #' + (i+1) + ' — tap to unfold</span>';
+
+      var noteText = document.createElement('p');
+      noteText.className = 'note-text';
+      noteText.textContent = text;
+
+      card.appendChild(preview);
+      card.appendChild(noteText);
+
+      card.addEventListener('click', function() {
+        if (card.classList.contains('sealed')) {
+          card.classList.remove('sealed');
+          card.classList.add('open', 'just-opened');
+          hint.style.opacity = '0';
+          setTimeout(function() { card.classList.remove('just-opened'); }, 400);
+        } else {
+          card.classList.remove('open');
+          card.classList.add('sealed');
+        }
+      });
+
+      grid.appendChild(card);
+    });
+
+    wrap.appendChild(grid);
+    return wrap;
+  }
+
+  function buildJarSVG(jar) {
+    var c = jar.glassColor;
+    var lid = jar.lidColor;
+    var stroke = jar.color;
+    return '<svg width="120" height="150" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">' +
+      // lid
+      '<rect x="30" y="18" width="60" height="16" rx="6" fill="' + lid + '"/>' +
+      '<rect x="26" y="26" width="68" height="10" rx="4" fill="' + lid + '" opacity="0.7"/>' +
+      // neck
+      '<rect x="35" y="34" width="50" height="10" rx="3" fill="' + c + '" stroke="' + stroke + '" stroke-width="1.5"/>' +
+      // body
+      '<path d="M25 46 Q22 80 22 100 Q22 130 60 132 Q98 130 98 100 Q98 80 95 46 Z" fill="' + c + '" stroke="' + stroke + '" stroke-width="1.8"/>' +
+      // glass shine
+      '<path d="M32 50 Q30 80 31 105" stroke="rgba(255,255,255,0.55)" stroke-width="4" stroke-linecap="round" fill="none"/>' +
+      '<path d="M40 48 Q38 60 39 72" stroke="rgba(255,255,255,0.3)" stroke-width="2.5" stroke-linecap="round" fill="none"/>' +
+      // rolled notes inside
+      '<rect x="44" y="72" width="10" height="22" rx="3" fill="' + stroke + '" opacity="0.55" transform="rotate(-8,49,83)"/>' +
+      '<rect x="57" y="68" width="10" height="26" rx="3" fill="' + stroke + '" opacity="0.45" transform="rotate(4,62,81)"/>' +
+      '<rect x="70" y="74" width="10" height="20" rx="3" fill="' + stroke + '" opacity="0.5" transform="rotate(-3,75,84)"/>' +
+      '<rect x="50" y="96" width="9" height="18" rx="3" fill="' + stroke + '" opacity="0.4" transform="rotate(6,54,105)"/>' +
+      '<rect x="64" y="94" width="9" height="20" rx="3" fill="' + stroke + '" opacity="0.38" transform="rotate(-5,68,104)"/>' +
+      // emoji on jar
+      '<text x="60" y="128" text-anchor="middle" font-size="18">' + jar.emoji + '</text>' +
+    '</svg>';
+  }
+
+  var row = document.getElementById('jars-row');
+  JARS.forEach(function(jar) {
+    row.appendChild(buildJar(jar));
+  });
+
+  // floating petals
+  var emojis = ['🌸','💗','🌷','✨','🌹'];
+  for (var i = 0; i < 12; i++) {
+    var fp = document.createElement('span');
+    fp.className = 'fp';
+    fp.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    fp.style.left = Math.random() * 100 + '%';
+    fp.style.animationDuration = (6 + Math.random() * 8) + 's';
+    fp.style.animationDelay = (Math.random() * 8) + 's';
+    fp.style.fontSize = (0.7 + Math.random() * 0.6) + 'rem';
+    document.body.appendChild(fp);
+  }
+  </script>
+</body>
+</html>
