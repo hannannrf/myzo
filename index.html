@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>For Zoa 🌸</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:#fff8f9; --card:#ffffff; --text:#2a1f25;
+      --muted:#9a7f8a; --accent:#d4638a; --accent2:#a78bbb; --radius:20px;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    /* ── floating hearts canvas ── */
+    #hearts-canvas {
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:0;
+      width:100%; height:100%;
+    }
+
+    /* everything sits above canvas */
+    .page { position:relative; z-index:1; }
+
+    /* ── hero ── */
+    .hero {
+      text-align:center;
+      padding:clamp(3rem,8vw,5.5rem) 1.5rem clamp(2rem,5vw,3rem);
+    }
+    .petals { display:flex; justify-content:center; gap:0.4rem; margin-bottom:1.5rem; font-size:1.6rem; }
+    .petal { animation:floatpetal 3s ease-in-out infinite; display:inline-block; }
+    .petal:nth-child(2){animation-delay:.4s}.petal:nth-child(3){animation-delay:.8s}
+    .petal:nth-child(4){animation-delay:1.2s}.petal:nth-child(5){animation-delay:1.6s}
+    @keyframes floatpetal{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+    h1 {
+      font-family:Fraunces,Georgia,serif;
+      font-size:clamp(2.2rem,7vw,3.6rem);
+      font-weight:500; letter-spacing:-0.02em; line-height:1.1;
+      color:var(--text); margin-bottom:0.7rem;
+    }
+    h1 em { font-style:italic; color:var(--accent); }
+    .hero-sub { color:var(--muted); font-size:1.05rem; max-width:340px; margin:0 auto 2.5rem; line-height:1.6; }
+
+    /* countdown */
+    .countdown-strip {
+      display:inline-flex; gap:1rem;
+      background:rgba(255,255,255,0.9);
+      border:1px solid rgba(212,99,138,0.2);
+      border-radius:50px; padding:0.6rem 1.4rem;
+      box-shadow:0 4px 20px rgba(212,99,138,0.1);
+      backdrop-filter:blur(6px);
+    }
+    .cd-unit { text-align:center; }
+    .cd-num { font-family:Fraunces,serif; font-size:1.4rem; color:var(--accent); line-height:1; display:block; }
+    .cd-label { font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); }
+    .cd-sep { color:var(--muted); font-size:1.2rem; align-self:center; margin-top:-4px; }
+
+    /* nav */
+    .nav-wrap { max-width:860px; margin:0 auto; padding:0 1.25rem 5rem; }
+    .section-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.14em; color:var(--muted); margin-bottom:1rem; padding-left:2px; }
+    .grid { display:grid; gap:0.9rem; grid-template-columns:1fr; }
+    @media(min-width:540px){.grid{grid-template-columns:repeat(2,1fr);}}
+    @media(min-width:820px){.grid{grid-template-columns:repeat(3,1fr);}}
+
+    a.card {
+      display:block; background:rgba(255,255,255,0.88);
+      border-radius:var(--radius); padding:1.4rem 1.5rem;
+      text-decoration:none; color:inherit;
+      border:1px solid rgba(0,0,0,0.055);
+      box-shadow:0 6px 24px rgba(42,31,37,0.07);
+      transition:transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+      position:relative; overflow:hidden;
+      backdrop-filter:blur(4px);
+    }
+    a.card::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(135deg,rgba(212,99,138,0.06) 0%,transparent 60%);
+      opacity:0; transition:opacity 0.22s ease;
+    }
+    a.card:hover { transform:translateY(-4px); box-shadow:0 18px 45px rgba(42,31,37,0.12); border-color:rgba(212,99,138,0.3); }
+    a.card:hover::before { opacity:1; }
+    .card-emoji { font-size:2rem; margin-bottom:0.7rem; display:block; }
+    a.card h2 { font-family:Fraunces,Georgia,serif; font-size:1.15rem; font-weight:500; color:var(--text); margin-bottom:0.35rem; }
+    a.card p { font-size:0.9rem; color:var(--muted); line-height:1.5; }
+
+    footer { text-align:center; padding:2rem 1rem 3rem; color:var(--muted); font-size:0.82rem; position:relative; z-index:1; }
+  </style>
+</head>
+<body>
+  <!-- floating hearts live in background -->
+  <canvas id="hearts-canvas"></canvas>
+
+  <div class="page">
+    <div class="hero">
+      <div class="petals">
+        <span class="petal">🌸</span><span class="petal">🌷</span>
+        <span class="petal">💗</span><span class="petal">🌹</span><span class="petal">🌸</span>
+      </div>
+      <h1>Hey <em>Zoa</em>,<br>this is all for you</h1>
+      <p class="hero-sub">A little corner of the internet made with love — just for you. Explore every page. 🤍</p>
+      <div class="countdown-strip">
+        <div class="cd-unit"><span class="cd-num" id="cd-d">—</span><span class="cd-label">days</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit"><span class="cd-num" id="cd-h">—</span><span class="cd-label">hrs</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit"><span class="cd-num" id="cd-m">—</span><span class="cd-label">min</span></div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit"><span class="cd-num" id="cd-s">—</span><span class="cd-label">sec</span></div>
+      </div>
+      <p style="color:var(--muted);font-size:0.78rem;margin-top:0.6rem;">together since April 4, 2026 🌙</p>
+    </div>
+
+    <div class="nav-wrap">
+      <p class="section-label">Pick a page</p>
+      <div class="grid">
+        <a class="card" href="us.html">
+          <span class="card-emoji">📸</span>
+          <h2>Nan &amp; Zoa</h2>
+          <p>Our photos — frozen in time.</p>
+        </a>
+        <a class="card" href="bouquet.html">
+          <span class="card-emoji">💐</span>
+          <h2>Flower Bouquet</h2>
+          <p>A bouquet that blooms just for you.</p>
+        </a>
+        <a class="card" href="letter.html">
+          <span class="card-emoji">💌</span>
+          <h2>A Letter for You</h2>
+          <p>Open the envelope — I wrote this for you.</p>
+        </a>
+        <a class="card" href="100things.html">
+          <span class="card-emoji">💕</span>
+          <h2>100 Things I Love About You</h2>
+          <p>Every single one is true.</p>
+        </a>
+        <a class="card" href="jars.html">
+          <span class="card-emoji">🫙</span>
+          <h2>Little Notes for You</h2>
+          <p>Three jars full of love — open one when you need it.</p>
+        </a>
+        <a class="card" href="song.html">
+          <span class="card-emoji">🎵</span>
+          <h2>Our Song</h2>
+          <p>Reflections — The Neighbourhood.</p>
+        </a>
+        <a class="card" href="future.html">
+          <span class="card-emoji">🌌</span>
+          <h2>Our Future</h2>
+          <p>Every star is a promise waiting for us.</p>
+        </a>
+      </div>
+    </div>
+
+    <footer>made with so much love, just for you zoa 🌸</footer>
+  </div>
+
+  <script>
+  // ── countdown ──
+  var START = new Date(2026,3,4);
+  function tick(){
+    var now=new Date(); var ms=now-START; if(ms<0)ms=0;
+    var s=Math.floor(ms/1000);
+    var d=Math.floor(s/86400); s-=d*86400;
+    var h=Math.floor(s/3600);  s-=h*3600;
+    var m=Math.floor(s/60);    s-=m*60;
+    document.getElementById('cd-d').textContent=d;
+    document.getElementById('cd-h').textContent=String(h).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(m).padStart(2,'0');
+    document.getElementById('cd-s').textContent=String(s).padStart(2,'0');
+  }
+  tick(); setInterval(tick,1000);
+
+  // ── floating hearts canvas ──
+  (function(){
+    var canvas = document.getElementById('hearts-canvas');
+    var ctx = canvas.getContext('2d');
+    var W, H, hearts=[];
+    var palette=['#f9c4d4','#f4a0bc','#e8c0d8','#d4a0c8','#f9d4e8','#ebb4cc','#f0c8dc'];
+
+    function resize(){
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }
+
+    function Heart(){
+      this.reset();
+    }
+    Heart.prototype.reset = function(){
+      this.x     = Math.random()*W;
+      this.y     = H + 30 + Math.random()*80;
+      this.size  = 10 + Math.random()*18;
+      this.vy    = 22 + Math.random()*36;
+      this.vx    = (Math.random()-0.5)*14;
+      this.alpha = 0.18 + Math.random()*0.32;
+      this.rot   = (Math.random()-0.5)*0.4;
+      this.rotV  = (Math.random()-0.5)*0.015;
+      this.wobP  = Math.random()*Math.PI*2;
+      this.wobS  = 0.0015+Math.random()*0.002;
+      this.wobA  = 14+Math.random()*22;
+      this.baseX = this.x;
+      this.col   = palette[Math.floor(Math.random()*palette.length)];
+      this.pulse = Math.random()*Math.PI*2;
+      this.pulseS= 0.002+Math.random()*0.003;
+      this.baseSize=this.size;
+    };
+
+    function drawHeart(ctx,x,y,size,angle,alpha,col){
+      ctx.save();
+      ctx.globalAlpha=alpha;
+      ctx.translate(x,y);
+      ctx.rotate(angle);
+      ctx.fillStyle=col;
+      ctx.beginPath();
+      var s=size*0.055;
+      ctx.moveTo(0,-s*0.5);
+      ctx.bezierCurveTo( s*2,-s*3,  s*5, s*0.5,  0,  s*4);
+      ctx.bezierCurveTo(-s*5, s*0.5,-s*2,-s*3,   0, -s*0.5);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    var TARGET=40;
+    function spawnIfNeeded(){
+      while(hearts.length<TARGET){ hearts.push(new Heart()); }
+    }
+
+    var last=0;
+    function frame(ts){
+      var dt=Math.min((ts-last)/1000,0.05); last=ts;
+      ctx.clearRect(0,0,W,H);
+      hearts.forEach(function(h){
+        h.y  -= h.vy*dt;
+        h.wobP+=h.wobS*(ts);
+        h.baseX+=h.vx*dt;
+        h.x = h.baseX+Math.sin(h.wobP)*h.wobA;
+        h.rot+=h.rotV;
+        h.pulse+=h.pulseS*(ts*0.5);
+        h.size=h.baseSize*(1+0.06*Math.sin(h.pulse));
+        if(h.y<-60) h.reset();
+        drawHeart(ctx,h.x,h.y,h.size,h.rot,h.alpha,h.col);
+      });
+      spawnIfNeeded();
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize',resize);
+    resize(); spawnIfNeeded();
+    requestAnimationFrame(frame);
+
+    // tap to burst hearts
+    document.addEventListener('click',function(e){
+      if(e.target.closest('a')||e.target.closest('button')) return;
+      for(var i=0;i<10;i++){
+        var h=new Heart();
+        h.x=h.baseX=e.clientX+(Math.random()-0.5)*60;
+        h.y=e.clientY+(Math.random()-0.5)*40;
+        h.vy=18+Math.random()*30;
+        h.size=8+Math.random()*14;
+        h.alpha=0.35+Math.random()*0.4;
+        hearts.push(h);
+      }
+    });
+  })();
+  </script>
+</body>
+</html>
