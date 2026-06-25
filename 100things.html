@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>100 Things I Love About You 💕</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --bg:#fff8f9; --accent:#d4638a; --accent2:#a78bbb; --muted:#9a7f8a; --text:#2a1f25; --card:#ffffff; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg);
+      min-height:100vh;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -5%, rgba(212,99,138,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse 55% 35% at 100% 100%, rgba(167,139,187,0.1) 0%, transparent 50%);
+    }
+    .back { padding:1.2rem 1.5rem 0; }
+    .back a { color:var(--accent); font-weight:600; text-decoration:none; font-size:0.95rem; }
+    .back a:hover { text-decoration:underline; }
+    header { text-align:center; padding:1.5rem 1rem 0.5rem; }
+    header h1 { font-family:Fraunces,Georgia,serif; font-size:clamp(1.8rem,5vw,2.6rem); font-weight:500; color:var(--text); margin-bottom:0.35rem; }
+    header h1 em { font-style:italic; color:var(--accent); }
+    header p { color:var(--muted); font-size:0.93rem; }
+
+    .counter {
+      text-align:center;
+      margin:1.2rem 0 0;
+      font-family:Fraunces,Georgia,serif;
+      font-size:clamp(2.5rem,8vw,4rem);
+      color:var(--accent);
+      line-height:1;
+    }
+    .counter-label { color:var(--muted); font-size:0.85rem; margin-top:0.2rem; }
+
+    .list-wrap {
+      max-width:640px;
+      margin:2rem auto 0;
+      padding:0 1.25rem 5rem;
+      display:grid;
+      gap:0.65rem;
+    }
+
+    .item {
+      background:var(--card);
+      border-radius:14px;
+      padding:0.9rem 1.1rem 0.9rem 1rem;
+      display:flex;
+      align-items:flex-start;
+      gap:0.8rem;
+      box-shadow:0 4px 18px rgba(42,31,37,0.06);
+      border:1px solid rgba(0,0,0,0.045);
+      opacity:0;
+      transform:translateY(16px);
+      transition:opacity 0.4s ease, transform 0.4s ease;
+    }
+    .item.visible { opacity:1; transform:translateY(0); }
+
+    .num {
+      font-family:Fraunces,Georgia,serif;
+      font-size:0.8rem;
+      color:var(--accent);
+      min-width:28px;
+      padding-top:2px;
+      font-weight:500;
+      opacity:0.7;
+    }
+    .text {
+      font-size:0.97rem;
+      color:var(--text);
+      line-height:1.5;
+    }
+
+    /* alternate card accent */
+    .item:nth-child(3n) { border-left:3px solid var(--accent2); }
+    .item:nth-child(3n+1) { border-left:3px solid var(--accent); }
+    .item:nth-child(3n+2) { border-left:3px solid #f4a0c0; }
+
+    /* last card special */
+    .item:last-child {
+      background:linear-gradient(135deg, #ffe0ec, #f0d4f8);
+      border:1px solid rgba(212,99,138,0.25);
+      padding:1.2rem 1.3rem;
+    }
+    .item:last-child .text { font-family:Fraunces,Georgia,serif; font-style:italic; font-size:1.05rem; color:#3a2030; }
+    .item:last-child .num { color:#c01050; opacity:1; font-size:0.9rem; }
+  </style>
+</head>
+<body>
+  <p class="back"><a href="index.html">← back home</a></p>
+  <header>
+    <h1>100 things I love about <em>Zoa</em></h1>
+    <p>every single one is true 💕</p>
+  </header>
+  <div style="text-align:center">
+    <p class="counter">100</p>
+    <p class="counter-label">reasons & counting</p>
+  </div>
+  <div class="list-wrap" id="list"></div>
+
+  <script>
+    var THINGS = [
+      "I love your eyes",
+      "I love your smile",
+      "I love your voice",
+      "I love the way you laugh — it's so cute",
+      "I love the way you're always honest",
+      "I love your hair",
+      "I love your fits — desi and doosri both",
+      "I love how you're so open with me",
+      "I love how you told your mom about me",
+      "I love how you're so energetic with me",
+      "I love how you fix everything",
+      "I love how you always make me happy",
+      "I love how you always make me feel better even when you're down too",
+      "I love how you act so tough with me lol — even though you know you'd fold in front of me 😔",
+      "I love how strong you are",
+      "I love that even after going through so much, you love me this much",
+      "I love the small details about me that you remember and write down in your notes",
+      "I love how you treat me like the luckiest guy in the world",
+      "I love how we never sleep mad",
+      "I love your pretty face so much",
+      "I love how we can talk about literally anything",
+      "I love how comfortable you make me feel",
+      "I love how I'm your safe place — the way you tell me everything first",
+      "I love how much you trust me",
+      "I love how you set up boundaries with every guy friend lol",
+      "I love how you get cute-wali jealous whenever I try to annoy you by mentioning a girl lol",
+      "I love the way we can talk all day all night and never run out of things to say",
+      "I love how excited you get over small things",
+      "I love how we're basically almost married lol",
+      "I love how close we got so quickly",
+      "I love how you make me feel so loved",
+      "I love how you have the finest lips — jo I'm dying to kiss lol",
+      "I love how you made that rose for me even though you have CIEs 😔",
+      "I love how you always reassure me with cute cheezain whenever I'm down",
+      "I love how you randomly act bossy lol — it's cute",
+      "I love how you're so okay with long distance even though you knew it was going to be hard 😔",
+      "I love how you never give up on me",
+      "I love how you always support me through everything",
+      "I love how you make me feel so motivated",
+      "I love how you literally return twice the energy I give you lol",
+      "I love how soft you are with animals",
+      "I love how excited you get over nature — I'll show you the world Zoa, I promise",
+      "I love how you make everything feel so special — even an ordinary moment",
+      "I love how you always appreciate even my smallest efforts",
+      "I love how you take out so much time to text me and call me",
+      "I love how you act angry with me even though you know you can never really be angry at me lol 😔",
+      "I love how you made me realise there is still one girl in this world who is actually perfect",
+      "I love how you made me believe in love again",
+      "I love how much time and effort you're putting into this relationship",
+      "I love how you're so serious about me lol Zoa",
+      "I love the way you're so kind",
+      "I love the way you were down to love me and decided to spend your life with me even though we've never even met lol",
+      "I love how you post cute si stories about me 😔",
+      "I love how you send me paras to make me happy",
+      "I love the way we've planned everything together for our future",
+      "I love how you never leave",
+      "I love how you get thori si shy on call whenever I tell you something super cute",
+      "I love how you're the first thing I wake up thinking about and my last thought before sleeping",
+      "I love how you make me feel so valued",
+      "I love the little cute things you do for me daily",
+      "I love how you complete me 😔",
+      "I love how you're not materialistic at all",
+      "I love how you bring out my inner child",
+      "I love how you get so happy over choti choti cheezain",
+      "I love how even after everything you've been through, you're still here making me feel the happiest I've ever been",
+      "I love how you're so random",
+      "I love how you care so much about me",
+      "I love the way we stay up all night just talking to each other 😔",
+      "I love how you prioritise me over anyone else",
+      "I love the way you're so chalant and emotional when you're with me",
+      "I love you with glasses on and off — both",
+      "I love you in red and blue and black — honestly any colour",
+      "I love how I can bully you, have emotional deep convos and be lovebirds all in the same day",
+      "I love the way you put up with my bs",
+      "I love the affection you give me on a daily basis",
+      "I love our cute wali calls — I could listen to your voice all day, it's so comforting",
+      "I love how insanely in love we are with each other",
+      "I love the way you always rethink about someone even if they do you wrong — you try not to hurt them",
+      "I love your red hair, your brown hair, your everything",
+      "I love how you have a close connection with your mom — that's such a green flag",
+      "I love your name — it's so perfect lol. Like… Zoa. Zoahannan lololol",
+      "I love how we laugh and talk over the dumbest cheezain and still feel so happy doing it",
+      "I love your random cute sa burst of ghussa HAHAHA",
+      "I love how you're so open about us and all your friends know about me 😔",
+      "I love how we've already planned everything — vacation spots, kids, marriage — sab hee sab lol",
+      "I love how you always wait and double-triple text me when I'm out or busy",
+      "I love how you update and text me every little while",
+      "I love how you share every single thing in your life with me — good or bad",
+      "I love your height lol — no jokes, it's actually perfect for me",
+      "I love how you pull off both western and desi so effortlessly",
+      "I love how you're so patient and positive about things — especially us",
+      "I love it when you send me paras",
+      "I love it when you send me random cute videos and pictures of yourself — they melt my heart",
+      "I love how attached you are to me",
+      "I love how you're so down to be my wifey lol",
+      "I love it when you laugh and it makes you look thora chinese — tumne bola tha",
+      "I love everything, everything, every single thing about you",
+      "I love you for being you",
+      "I love you for being mine",
+      "I love you, Zoa. 🌹"
+    ];
+
+    var list = document.getElementById('list');
+    THINGS.forEach(function(t, i){
+      var div = document.createElement('div');
+      div.className = 'item';
+      div.innerHTML = '<span class="num">' + (i+1) + '</span><span class="text">' + t + '</span>';
+      list.appendChild(div);
+    });
+
+    // staggered reveal on scroll
+    var items = document.querySelectorAll('.item');
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){
+          setTimeout(function(){ e.target.classList.add('visible'); }, 60);
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold:0.1 });
+    items.forEach(function(el){ obs.observe(el); });
+  </script>
+</body>
+</html>
