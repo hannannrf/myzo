@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>A Bouquet for Zoa 💐</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --bg:#fff8f9; --accent:#d4638a; --muted:#9a7f8a; --text:#2a1f25; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:var(--bg);
+      min-height:100vh;
+      background-image:radial-gradient(ellipse 80% 50% at 50% -5%, rgba(212,99,138,0.13) 0%, transparent 55%);
+      overflow-x:hidden;
+    }
+    .back { padding:1.2rem 1.5rem 0; }
+    .back a { color:var(--accent); font-weight:600; text-decoration:none; font-size:0.95rem; }
+    .back a:hover { text-decoration:underline; }
+    header { text-align:center; padding:1.5rem 1rem 0.5rem; }
+    header h1 { font-family:Fraunces,Georgia,serif; font-size:clamp(1.8rem,5vw,2.6rem); font-weight:500; color:var(--text); margin-bottom:0.35rem; }
+    header h1 em { font-style:italic; color:var(--accent); }
+    header p { color:var(--muted); font-size:0.95rem; }
+    .canvas-wrap { display:flex; justify-content:center; padding:1rem 1rem 0; }
+    canvas { max-width:100%; }
+    .message { text-align:center; padding:1.2rem 1.5rem 3rem; max-width:400px; margin:0 auto; }
+    .message p { font-family:Fraunces,Georgia,serif; font-style:italic; font-size:1.15rem; color:var(--text); line-height:1.7; }
+    .message span { display:block; color:var(--muted); font-family:"DM Sans",sans-serif; font-style:normal; font-size:0.85rem; margin-top:0.6rem; }
+    .fp { position:fixed; top:-30px; font-size:1.1rem; animation:falldown linear infinite; opacity:0.55; pointer-events:none; }
+    @keyframes falldown { to { transform:translateY(110vh) rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <p class="back"><a href="index.html">← back home</a></p>
+  <header>
+    <h1>A bouquet for <em>Zoa</em></h1>
+    <p>picked with love, just for you 🌸</p>
+  </header>
+  <div class="canvas-wrap">
+    <canvas id="c" width="420" height="500"></canvas>
+  </div>
+  <div class="message">
+    <p>"You made a rose for me even with your CIEs going on. So here's a whole bouquet, just for you. 🌹"</p>
+    <span>— always & forever yours, Nan</span>
+  </div>
+
+  <script>
+  (function(){
+    var canvas = document.getElementById('c');
+    var ctx = canvas.getContext('2d');
+    var W = canvas.width, H = canvas.height;
+    var t = 0;
+
+    // ---- helpers ----
+    function lerp(a,b,x){ return a+(b-a)*x; }
+
+    // ---- stem drawing ----
+    function stem(x1,y1,x2,y2,w,col){
+      ctx.save();
+      ctx.strokeStyle = col||'#4a8a3a';
+      ctx.lineWidth = w||3;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+      ctx.restore();
+    }
+
+    // ---- leaf ----
+    function leaf(x,y,angle,size,col){
+      ctx.save();
+      ctx.translate(x,y); ctx.rotate(angle);
+      ctx.fillStyle = col||'#5aaa48';
+      ctx.beginPath();
+      ctx.ellipse(0,0,size*0.4,size,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ---- rose ----
+    function rose(x,y,r,col1,col2,sway){
+      var sx = Math.sin(t*0.8+sway)*4;
+      ctx.save(); ctx.translate(x+sx,y);
+      // outer petals
+      var outerCols = [col1, col2, col1, col2, col1, col2];
+      for(var i=0;i<6;i++){
+        ctx.save();
+        ctx.rotate((i/6)*Math.PI*2);
+        ctx.fillStyle = outerCols[i];
+        ctx.globalAlpha=0.85;
+        ctx.beginPath();
+        ctx.ellipse(0,-r*0.85,r*0.42,r*0.65,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      // mid petals
+      for(var i=0;i<5;i++){
+        ctx.save();
+        ctx.rotate((i/5)*Math.PI*2+0.3);
+        ctx.fillStyle = col1;
+        ctx.globalAlpha=0.92;
+        ctx.beginPath();
+        ctx.ellipse(0,-r*0.55,r*0.35,r*0.5,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      // centre
+      ctx.globalAlpha=1;
+      ctx.fillStyle = col2;
+      ctx.beginPath(); ctx.arc(0,0,r*0.32,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = col1;
+      ctx.beginPath(); ctx.arc(0,0,r*0.18,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // ---- tulip ----
+    function tulip(x,y,col,sway){
+      var sx = Math.sin(t*0.7+sway)*3;
+      ctx.save(); ctx.translate(x+sx,y);
+      ctx.fillStyle = col;
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.bezierCurveTo(-18,-30,-20,-60,-8,-72);
+      ctx.bezierCurveTo(0,-80,0,-80,0,-72);
+      ctx.bezierCurveTo(0,-80,0,-80,8,-72);
+      ctx.bezierCurveTo(20,-60,18,-30,0,0);
+      ctx.fill();
+      // highlight
+      ctx.fillStyle='rgba(255,255,255,0.18)';
+      ctx.beginPath();
+      ctx.moveTo(0,0);
+      ctx.bezierCurveTo(-6,-28,-8,-58,0,-70);
+      ctx.bezierCurveTo(2,-50,2,-20,0,0);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ---- daisy ----
+    function daisy(x,y,r,sway){
+      var sx = Math.sin(t*0.9+sway)*3;
+      ctx.save(); ctx.translate(x+sx,y);
+      // petals
+      for(var i=0;i<12;i++){
+        ctx.save();
+        ctx.rotate((i/12)*Math.PI*2);
+        ctx.fillStyle='#fff';
+        ctx.globalAlpha=0.93;
+        ctx.beginPath();
+        ctx.ellipse(0,-r*1.1,r*0.28,r*0.6,0,0,Math.PI*2);
+        ctx.fill();
+        ctx.restore();
+      }
+      // centre
+      ctx.globalAlpha=1;
+      var grd=ctx.createRadialGradient(0,0,0,0,0,r);
+      grd.addColorStop(0,'#ffe066'); grd.addColorStop(1,'#ffaa00');
+      ctx.fillStyle=grd;
+      ctx.beginPath(); ctx.arc(0,0,r,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // ---- lavender sprig ----
+    function lavender(x,y,sway){
+      var sx=Math.sin(t*0.6+sway)*2.5;
+      ctx.save(); ctx.translate(x+sx,y);
+      var buds=[
+        {x:-7,y:-42},{x:7,y:-35},{x:-7,y:-28},{x:7,y:-21},{x:-5,y:-14},{x:5,y:-7}
+      ];
+      buds.forEach(function(b){
+        ctx.fillStyle='#b07fd4';
+        ctx.globalAlpha=0.88;
+        ctx.beginPath();
+        ctx.ellipse(b.x,b.y,5,7,0.2,0,Math.PI*2);
+        ctx.fill();
+      });
+      ctx.globalAlpha=1;
+      ctx.restore();
+    }
+
+    // ---- baby's breath (small white clusters) ----
+    function babysBreath(x,y,sway){
+      var sx=Math.sin(t*1.1+sway)*2;
+      ctx.save(); ctx.translate(x+sx,y);
+      var dots=[
+        {x:0,y:-10},{x:-8,y:-20},{x:8,y:-18},{x:-14,y:-32},{x:2,y:-34},{x:14,y:-28},
+        {x:-6,y:-42},{x:10,y:-44},{x:-18,y:-22}
+      ];
+      dots.forEach(function(d){
+        ctx.fillStyle='#fff';
+        ctx.globalAlpha=0.9;
+        ctx.beginPath(); ctx.arc(d.x,d.y,4,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#f5e8f0';
+        ctx.beginPath(); ctx.arc(d.x,d.y,2,0,Math.PI*2); ctx.fill();
+      });
+      ctx.globalAlpha=1;
+      ctx.restore();
+    }
+
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+
+      // soft background glow
+      var bgGrd=ctx.createRadialGradient(W/2,H*0.55,30,W/2,H*0.55,200);
+      bgGrd.addColorStop(0,'rgba(255,230,240,0.4)');
+      bgGrd.addColorStop(1,'rgba(255,248,249,0)');
+      ctx.fillStyle=bgGrd; ctx.fillRect(0,0,W,H);
+
+      var baseX=W/2, baseY=H-30;
+
+      // --- STEMS ---
+      // center rose
+      ctx.save(); ctx.strokeStyle='#4a8a3a'; ctx.lineWidth=3.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX+5,baseY-100,baseX-2,baseY-210); ctx.stroke(); ctx.restore();
+      // left rose
+      ctx.save(); ctx.strokeStyle='#4a8a3a'; ctx.lineWidth=3; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX-30,baseY-90,baseX-55,baseY-185); ctx.stroke(); ctx.restore();
+      // right rose
+      ctx.save(); ctx.strokeStyle='#4a8a3a'; ctx.lineWidth=3; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX+30,baseY-90,baseX+58,baseY-185); ctx.stroke(); ctx.restore();
+      // far left tulip
+      ctx.save(); ctx.strokeStyle='#5a9a45'; ctx.lineWidth=2.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX-60,baseY-90,baseX-95,baseY-185); ctx.stroke(); ctx.restore();
+      // far right tulip
+      ctx.save(); ctx.strokeStyle='#5a9a45'; ctx.lineWidth=2.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX+60,baseY-90,baseX+98,baseY-185); ctx.stroke(); ctx.restore();
+      // daisy left
+      ctx.save(); ctx.strokeStyle='#6aaa55'; ctx.lineWidth=2; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX-80,baseY-100,baseX-125,baseY-200); ctx.stroke(); ctx.restore();
+      // lavender right
+      ctx.save(); ctx.strokeStyle='#6aaa55'; ctx.lineWidth=2; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX+80,baseY-100,baseX+128,baseY-195); ctx.stroke(); ctx.restore();
+      // baby's breath stems (2 small)
+      ctx.save(); ctx.strokeStyle='#8aba70'; ctx.lineWidth=1.5; ctx.lineCap='round';
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX-45,baseY-120,baseX-70,baseY-240); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(baseX,baseY); ctx.quadraticCurveTo(baseX+45,baseY-120,baseX+72,baseY-238); ctx.stroke();
+      ctx.restore();
+
+      // --- LEAVES ---
+      leaf(baseX-28,baseY-130,-0.7,22,'#5aaa48');
+      leaf(baseX+32,baseY-125,0.65,20,'#7ac460');
+      leaf(baseX-60,baseY-140,-0.9,18,'#5aaa48');
+      leaf(baseX+64,baseY-138,0.85,17,'#7ac460');
+      leaf(baseX-8,baseY-160,-0.25,15,'#5aaa48');
+      leaf(baseX+10,baseY-165,0.3,15,'#7ac460');
+      leaf(baseX-90,baseY-155,-1.1,16,'#5aaa48');
+      leaf(baseX+94,baseY-152,1.0,15,'#7ac460');
+
+      // --- FLOWERS (back to front) ---
+      babysBreath(baseX-70,baseY-240,1.5);
+      babysBreath(baseX+72,baseY-238,2.0);
+      daisy(baseX-125,baseY-200+Math.sin(t*0.9)*3,10,0);
+      lavender(baseX+128,baseY-195,0.5);
+      tulip(baseX-95,baseY-185,  '#ff9ecb',0.2);
+      tulip(baseX+98,baseY-185,  '#ffb3d0',1.1);
+      rose(baseX-55,baseY-185,24,'#e8507a','#ff8fab',0.3);
+      rose(baseX+58,baseY-185,24,'#f06090','#ffaec9',1.0);
+      rose(baseX,  baseY-210,30,'#d4204a','#ff6b9d',0.0);
+
+      // --- WRAP / RIBBON ---
+      ctx.save();
+      ctx.fillStyle='#f9d0df';
+      ctx.globalAlpha=0.9;
+      ctx.beginPath();
+      ctx.moveTo(baseX-80,baseY-20);
+      ctx.quadraticCurveTo(baseX,baseY-40,baseX+80,baseY-20);
+      ctx.quadraticCurveTo(baseX+65,baseY+5,baseX,baseY+10);
+      ctx.quadraticCurveTo(baseX-65,baseY+5,baseX-80,baseY-20);
+      ctx.fill();
+      // bow
+      ctx.globalAlpha=1;
+      ctx.fillStyle='#f4a0c0';
+      ctx.beginPath(); ctx.ellipse(baseX-18,baseY-30,16,9,0.5,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(baseX+18,baseY-30,16,9,-0.5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#e8507a';
+      ctx.beginPath(); ctx.arc(baseX,baseY-30,7,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+
+      // sparkles
+      var sp=[{x:80,y:80},{x:355,y:95},{x:65,y:165},{x:370,y:175},{x:210,y:50}];
+      sp.forEach(function(s,i){
+        var alpha=0.4+0.3*Math.sin(t*1.5+i);
+        ctx.save(); ctx.globalAlpha=alpha; ctx.fillStyle='#d4638a';
+        ctx.font='16px serif'; ctx.fillText('✦',s.x,s.y);
+        ctx.restore();
+      });
+
+      t += 0.02;
+      requestAnimationFrame(draw);
+    }
+    draw();
+
+    // petal rain
+    var emojis=['🌸','🌺','🌹','💗','🌷'];
+    for(var i=0;i<14;i++){
+      var el=document.createElement('span');
+      el.className='fp';
+      el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left=Math.random()*100+'%';
+      el.style.animationDuration=(5+Math.random()*7)+'s';
+      el.style.animationDelay=(Math.random()*7)+'s';
+      el.style.fontSize=(0.8+Math.random()*0.7)+'rem';
+      document.body.appendChild(el);
+    }
+  })();
+  </script>
+</body>
+</html>
