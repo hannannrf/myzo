@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Our Future 🌌</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;1,9..144,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root { --accent:#e8a0bf; --accent2:#a78bbb; --gold:#ffe066; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body {
+      font-family:"DM Sans",system-ui,sans-serif;
+      background:#07050f;
+      min-height:100vh;
+      overflow-x:hidden;
+      color:#f4eef8;
+    }
+    .back { padding:1.2rem 1.5rem 0; position:relative; z-index:10; }
+    .back a { color:var(--accent); font-weight:600; text-decoration:none; font-size:0.95rem; }
+    .back a:hover { text-decoration:underline; }
+
+    header {
+      text-align:center;
+      padding:1.5rem 1rem 0.5rem;
+      position:relative; z-index:10;
+    }
+    header h1 {
+      font-family:Fraunces,Georgia,serif;
+      font-size:clamp(1.8rem,5vw,2.6rem);
+      font-weight:500;
+      margin-bottom:0.35rem;
+      color:#f4eef8;
+    }
+    header h1 em { font-style:italic; color:var(--accent); }
+    header p { color:#8a7a9a; font-size:0.93rem; }
+
+    /* starfield canvas — fixed behind everything */
+    #starfield {
+      position:fixed;
+      inset:0;
+      z-index:0;
+      pointer-events:none;
+    }
+
+    /* scrollable content sits on top */
+    .sky {
+      position:relative;
+      z-index:2;
+      min-height:100vh;
+      padding-bottom:5rem;
+    }
+
+    /* constellation map */
+    .map-wrap {
+      position:relative;
+      max-width:700px;
+      margin:2rem auto 0;
+      padding:0 1rem;
+      min-height:520px;
+    }
+
+    /* star node */
+    .star-node {
+      position:absolute;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      cursor:pointer;
+      z-index:5;
+      transform:translate(-50%,-50%);
+    }
+
+    .star-glow {
+      width:22px; height:22px;
+      border-radius:50%;
+      background:radial-gradient(circle, #fff 10%, var(--star-col,#e8a0bf) 50%, transparent 75%);
+      box-shadow:0 0 10px 3px var(--star-col,#e8a0bf), 0 0 25px 6px rgba(232,160,191,0.3);
+      animation:twinkle var(--tw-dur,2.2s) ease-in-out infinite;
+      transition:transform 0.2s ease, box-shadow 0.2s ease;
+      flex-shrink:0;
+    }
+    .star-node:hover .star-glow, .star-node.active .star-glow {
+      transform:scale(1.5);
+      box-shadow:0 0 18px 6px var(--star-col,#e8a0bf), 0 0 45px 12px rgba(232,160,191,0.4);
+    }
+    @keyframes twinkle {
+      0%,100%{opacity:1;transform:scale(1)}
+      50%{opacity:0.65;transform:scale(0.88)}
+    }
+
+    .star-label {
+      font-size:0.72rem;
+      color:#c4b0d4;
+      margin-top:5px;
+      text-align:center;
+      white-space:nowrap;
+      text-shadow:0 1px 6px rgba(0,0,0,0.8);
+      max-width:90px;
+      white-space:normal;
+      line-height:1.2;
+    }
+
+    /* popup card */
+    .popup {
+      position:fixed;
+      bottom:2rem; left:50%;
+      transform:translateX(-50%) translateY(20px);
+      background:rgba(20,14,32,0.96);
+      backdrop-filter:blur(12px);
+      border:1px solid rgba(232,160,191,0.3);
+      border-radius:20px;
+      padding:1.3rem 1.5rem;
+      max-width:min(360px,90vw);
+      width:100%;
+      z-index:20;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity 0.3s ease, transform 0.3s ease;
+      box-shadow:0 20px 60px rgba(0,0,0,0.6);
+    }
+    .popup.show {
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+      pointer-events:all;
+    }
+    .popup-emoji { font-size:1.8rem; margin-bottom:0.5rem; display:block; }
+    .popup-title {
+      font-family:Fraunces,Georgia,serif;
+      font-size:1.15rem;
+      color:var(--accent);
+      margin-bottom:0.4rem;
+    }
+    .popup-text {
+      font-size:0.93rem;
+      color:#d4c8e0;
+      line-height:1.6;
+    }
+    .popup-close {
+      position:absolute;
+      top:0.8rem; right:1rem;
+      background:none; border:none;
+      color:#8a7a9a; font-size:1.1rem;
+      cursor:pointer; padding:2px 4px;
+    }
+    .popup-close:hover { color:#fff; }
+
+    /* SVG constellation lines */
+    .constellation-svg {
+      position:absolute;
+      inset:0;
+      width:100%; height:100%;
+      pointer-events:none;
+      z-index:3;
+    }
+
+    /* hint */
+    .tap-hint {
+      text-align:center;
+      color:#5a4a6a;
+      font-size:0.82rem;
+      margin-top:0.5rem;
+      animation:pulse 2.5s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+
+    /* shooting star */
+    .shoot {
+      position:fixed;
+      width:120px; height:1.5px;
+      background:linear-gradient(90deg, transparent, #fff, transparent);
+      border-radius:50%;
+      opacity:0;
+      z-index:1;
+      pointer-events:none;
+      animation:shoot 1s ease-out forwards;
+    }
+    @keyframes shoot {
+      0%{opacity:0;transform:translateX(0) translateY(0)}
+      20%{opacity:1}
+      100%{opacity:0;transform:translateX(220px) translateY(80px)}
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+
+  <div class="sky">
+    <p class="back"><a href="index.html">← back home</a></p>
+    <header>
+      <h1>Our <em>future</em></h1>
+      <p>tap a star to see what's waiting for us 🌌</p>
+    </header>
+    <p class="tap-hint">✦ every star is a promise ✦</p>
+
+    <div class="map-wrap" id="mapWrap">
+      <!-- constellation SVG lines drawn by JS -->
+      <svg class="constellation-svg" id="conSvg"></svg>
+      <!-- star nodes injected by JS -->
+    </div>
+  </div>
+
+  <!-- popup -->
+  <div class="popup" id="popup">
+    <button class="popup-close" onclick="closePopup()">✕</button>
+    <span class="popup-emoji" id="p-emoji">🌙</span>
+    <p class="popup-title" id="p-title">Title</p>
+    <p class="popup-text" id="p-text">Text</p>
+  </div>
+
+  <script>
+  // ---- starfield background ----
+  (function(){
+    var canvas = document.getElementById('starfield');
+    var ctx = canvas.getContext('2d');
+    var stars = [];
+    function resize(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    function initStars(){
+      stars = [];
+      for(var i=0;i<260;i++){
+        stars.push({
+          x: Math.random()*canvas.width,
+          y: Math.random()*canvas.height,
+          r: 0.3+Math.random()*1.4,
+          alpha: 0.2+Math.random()*0.8,
+          speed: 0.003+Math.random()*0.008,
+          phase: Math.random()*Math.PI*2
+        });
+      }
+    }
+    var t=0;
+    function draw(){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // deep space gradient
+      var grd=ctx.createRadialGradient(canvas.width/2,canvas.height/2,0,canvas.width/2,canvas.height/2,canvas.width*0.8);
+      grd.addColorStop(0,'#0e0820'); grd.addColorStop(1,'#04030c');
+      ctx.fillStyle=grd; ctx.fillRect(0,0,canvas.width,canvas.height);
+      // stars
+      stars.forEach(function(s){
+        var a=s.alpha*(0.6+0.4*Math.sin(s.phase+t*s.speed*60));
+        ctx.save();
+        ctx.globalAlpha=a;
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      });
+      t+=0.016;
+      requestAnimationFrame(draw);
+    }
+    window.addEventListener('resize',function(){ resize(); initStars(); });
+    resize(); initStars(); draw();
+  })();
+
+  // ---- shooting stars ----
+  function shootingStar(){
+    var el=document.createElement('div'); el.className='shoot';
+    el.style.left=Math.random()*70+'%';
+    el.style.top=Math.random()*40+'%';
+    el.style.transform='rotate('+(20+Math.random()*30)+'deg)';
+    document.body.appendChild(el);
+    setTimeout(function(){ el.remove(); },1100);
+    setTimeout(shootingStar, 4000+Math.random()*8000);
+  }
+  setTimeout(shootingStar, 2000);
+
+  // ---- star data ----
+  // positions as % of mapWrap (700px wide, 520px tall)
+  var STARS = [
+    {
+      emoji:'🌙',
+      title:'The day we finally meet',
+      text:'The moment I\'ve been dreaming about every single day. I\'m going to be so nervous and so happy at the same time. And then I\'ll never want to let go.',
+      col:'#e8a0bf',
+      label:'the first meeting',
+      px:50, py:12,
+      tw:'2.4s'
+    },
+    {
+      emoji:'✈️',
+      title:'Our first trip together',
+      text:'We\'ve already planned so many places. Wherever we go first — it\'s going to feel like the whole world opened up the moment we\'re side by side.',
+      col:'#a78bbb',
+      label:'first trip',
+      px:22, py:28,
+      tw:'2.0s'
+    },
+    {
+      emoji:'🌅',
+      title:'Watching a sunrise together',
+      text:'Just us, somewhere quiet, watching the sky turn pink. No distance. No screens. Just you next to me while the world wakes up.',
+      col:'#f4b89a',
+      label:'our sunrise',
+      px:78, py:25,
+      tw:'1.8s'
+    },
+    {
+      emoji:'💍',
+      title:'The day I make it official',
+      text:'You already know I\'m serious about you. But one day I\'m going to do this properly — get down on one knee and ask you to be mine forever. And I already know the answer. 🥺',
+      col:'#ffe066',
+      label:'the proposal',
+      px:35, py:50,
+      tw:'2.8s'
+    },
+    {
+      emoji:'🤍',
+      title:'Our wedding day',
+      text:'You in white. Me terrified but the happiest I\'ve ever been. Our families. Our forever. I can\'t wait to call you my wife, Zoa.',
+      col:'#e8e8f8',
+      label:'our wedding',
+      px:65, py:48,
+      tw:'2.2s'
+    },
+    {
+      emoji:'🏠',
+      title:'Our home',
+      text:'A place that\'s ours. Where we cook together and fight over the remote and fall asleep on the same couch. Every ordinary moment, together.',
+      col:'#90e0b0',
+      label:'our home',
+      px:14, py:62,
+      tw:'1.9s'
+    },
+    {
+      emoji:'👶',
+      title:'Our little ones',
+      text:'We\'ve talked about this already lol. I want everything with you — the chaos, the sleepless nights, the tiny hands. All of it. With you.',
+      col:'#ffb3c6',
+      label:'our kids',
+      px:84, py:65,
+      tw:'2.6s'
+    },
+    {
+      emoji:'🌍',
+      title:'Showing you the world',
+      text:'I promised you this. Every nature thing that makes you light up, every place you\'ve ever wanted to see — I\'m going to take you there. All of it. I mean it.',
+      col:'#80d4f0',
+      label:'the world',
+      px:48, py:78,
+      tw:'2.1s'
+    },
+    {
+      emoji:'👴🏻👵🏻',
+      title:'Growing old together',
+      text:'Still annoying each other at 80. Still choosing each other every single day. That\'s the plan. That\'s always been the plan.',
+      col:'#c8b4f0',
+      label:'forever & always',
+      px:50, py:95,
+      tw:'3.0s'
+    }
+  ];
+
+  // constellation line pairs (index → index)
+  var LINES = [
+    [0,1],[0,2],[1,3],[2,3],[3,4],[3,5],[4,6],[5,7],[6,8],[7,8]
+  ];
+
+  var mapWrap = document.getElementById('mapWrap');
+  var conSvg  = document.getElementById('conSvg');
+  var W = mapWrap.offsetWidth || 680;
+  var H = 520;
+  mapWrap.style.height = H + 'px';
+
+  // draw constellation lines
+  LINES.forEach(function(pair){
+    var a = STARS[pair[0]], b = STARS[pair[1]];
+    var x1=a.px/100*W, y1=a.py/100*H, x2=b.px/100*W, y2=b.py/100*H;
+    var line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    line.setAttribute('stroke','rgba(200,180,230,0.18)');
+    line.setAttribute('stroke-width','1');
+    line.setAttribute('stroke-dasharray','4 6');
+    conSvg.appendChild(line);
+  });
+
+  // place star nodes
+  STARS.forEach(function(s,i){
+    var node = document.createElement('div');
+    node.className = 'star-node';
+    node.style.left = s.px + '%';
+    node.style.top  = s.py + '%';
+    node.style.setProperty('--star-col', s.col);
+    node.style.setProperty('--tw-dur', s.tw);
+    node.innerHTML =
+      '<div class="star-glow"></div>' +
+      '<span class="star-label">' + s.label + '</span>';
+    node.addEventListener('click', function(){
+      openPopup(s, node);
+    });
+    mapWrap.appendChild(node);
+  });
+
+  var activeNode = null;
+  function openPopup(s, node){
+    if(activeNode) activeNode.classList.remove('active');
+    activeNode = node;
+    node.classList.add('active');
+    document.getElementById('p-emoji').textContent  = s.emoji;
+    document.getElementById('p-title').textContent  = s.title;
+    document.getElementById('p-text').textContent   = s.text;
+    document.getElementById('popup').classList.add('show');
+  }
+  function closePopup(){
+    document.getElementById('popup').classList.remove('show');
+    if(activeNode){ activeNode.classList.remove('active'); activeNode=null; }
+  }
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePopup(); });
+  </script>
+</body>
+</html>
